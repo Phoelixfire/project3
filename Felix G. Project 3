@@ -1,0 +1,692 @@
+//CST 112 Felix Gonzales Project 3
+
+
+
+Button[] buttons;
+String buttonNames[]=  { "Up", "Down", "Climb", "Flock", "Reset", "Quit" };
+int numButtons=  buttonNames.length;
+
+float horizon = 250;
+float sunX = 50;
+float sunY = 50;
+float treeX = 100;
+float i;
+float goldX = random(50, 750);
+float goldY = random(300, 570);
+int points = 0;
+float bP = 0;
+float bpY = random (2, 15); //bird position Y-Axis
+float birdS = random (2, 6);  // bird speed
+
+Hero tom;
+Ore gold;
+Dog theo;
+Littledog oreo;
+Monkey jimmy;
+Bird[] birds = new Bird[5];
+Plant rose;
+
+void setup() {
+  size(800, 600);
+  tom= new Hero();
+  gold= new Ore();
+  theo= new Dog();
+  oreo= new Littledog();
+  jimmy= new Monkey();
+  rose = new Plant();
+  birds[0] = new Bird(bP-40, 10*bpY, birdS);
+  birds[1] = new Bird(bP-20, 12*bpY, birdS);
+  birds[2] = new Bird(bP, 14*bpY, birdS);
+  birds[3] = new Bird(bP-20, 16*bpY, birdS);
+  birds[4] = new Bird(bP-40, 18*bpY, birdS);
+  makebuttons();
+}  
+
+
+void draw() {
+  scene();
+  sun();
+  house();
+  show();
+  action();
+  display();
+  buttons();
+}
+
+void reset() {
+  tom.reset();
+  gold.reset();
+  theo.reset();
+  rose.reset();
+}
+
+void action() {
+  if (dist(tom.x, tom.y, gold.x, gold.y) >= 50) {
+    tom.dx= ((gold.x - tom.x)/50);
+    tom.dy= (gold.y - tom.y)/50;
+  }
+  if ( dist(tom.x, tom.y, gold.x, gold.y) < 50) {
+    reset();
+    points += 10;
+  }
+  if (dist(theo.x, theo.y, tom.x, tom.y) >= 50) {
+    theo.dx= ((tom.x - theo.x)/50);
+    theo.dy= (tom.y - theo.y)/50;
+  }
+  if ( dist(theo.x, theo.y, tom.x, tom.y) < 50) {
+    reset();
+    
+    points -= 10;
+  }
+  if (dist(oreo.x, oreo.y, theo.x, theo.y) >= 50) {
+    oreo.dx= ((theo.x - oreo.x)/50);
+    oreo.dy= (theo.y - oreo.y)/50;
+  }
+  tom.move();
+  theo.move();
+  oreo.move();
+  for (int i = 0; i < 5; i++) {
+    birds[i].move();
+  }
+
+
+
+
+  if (tom.x > width+100 || tom.x < -100) {     //fixes if hero or dog go out of screen
+    reset();
+  }
+
+  if (tom.y > height+100 || tom.y < -100) {
+    reset();
+  }
+
+  if (theo.x > width+100 || theo.x < -100) {
+    reset();
+  }
+
+  if (theo.y > height+100 || theo.y < -100) {
+    reset();
+  }
+} 
+
+void show() {
+  tom.show();
+  gold.show();
+  theo.show();
+  oreo.show();
+  for (int i = 0; i<5; i++) {
+    birds[i].show();
+  }
+  ladder();
+  jimmy.show();
+  rose.show();
+}
+
+void display() {
+  fill(#FFFFFF);
+  textSize(15);
+  text("Score: "+points, 150, 30);
+  text("Press R to Reset", 550, 50);
+  text("Press S to set points to 0", 550, 70);
+  text("Press q to Exit", 550, 90);
+  text("Press u to move monkey up", 550, 110);
+  text("Press d to move monkey down", 550, 130);
+  text("Press m to move monkey freely", 550, 150);
+  text("Press k to send flock", 550, 170);
+  text("CST 112 Felix Gonzales", 550, 550);
+  
+  
+}
+
+class Plant {
+  float pM=10;
+  
+    void reset() {
+    pM = random(-10, 10);
+  }
+  void show() {
+
+    for (int i = 0; i < width; i = i + 30) {
+      stroke(#90CE5E);
+      line(i, 600, i+pM, 580);  //plant 
+      fill(#F50733);
+      stroke(#F50733);
+      strokeWeight(2);
+      ellipse(i+pM, 580, 5, 5); //rose
+    }
+  }
+  
+}
+
+
+void scene() {
+  rectMode(CORNER);
+  noStroke();
+  fill(#1D983B);
+  rect(0, horizon, 800, 400);   //grass
+  fill(#06B5D6);
+  rect(0, 0, 800, 300);  //sky
+
+
+
+  for ( int i = 0; i <= 800; i = i + 90) { //dull trees
+    fill(#645944);
+    triangle( i+50, 300, i+90, 300, i+70, 230);
+    fill(#FFFFFF);
+    triangle( i+63, 255, i+77, 255, i +70, 230);
+  }
+
+  for ( int i = 0; i <= 800; i = i + 33) {  //mountains
+    fill(#6F6553);
+    triangle( i+30, 300, i+50, 300, i+40, 240);
+    fill(#57A55F);
+    triangle( i+32, 270, i+48, 270, i+40, 240);
+  }
+
+  for ( int i = 0; i <= 800; i = i + 70) {  //bright trees
+    fill(#4B402C);
+    triangle( i, 300, i + 26, 300, i +13, 250);
+    fill(#02C917);
+    triangle( i + 3, 280, i + 22, 280, i +13, 250);
+  }
+}
+
+
+void house() {
+  fill(#EA112E);
+  rect(300, 225, 100, 75 );  //house
+  fill(#9B673D);
+  triangle(280, 230, 420, 230, 350, 170);  //roof
+  rect(310, 250, 25, 50);  //door
+  fill(#E2E854);
+  ellipse(350, 210, 30, 30);   //top window
+  rect(360, 240, 30, 30);   //bottom window
+  fill(#ffffff);
+  ellipse(330, 275, 3, 3);
+}
+
+void sun() {
+  fill(#F1F543);
+  ellipse(sunX, sunY, 50, 50);   //sun
+  if (sunX >= 800) {
+    sunX = 0;
+  }  
+  sunX = sunX + 1;
+}
+
+class Hero {
+
+  float x = 100;
+  float y = 250;
+  float dx, dy;
+
+  void reset () {
+    x = random(0, 750);
+    y = random(300, 550);
+    dx = random(-3, 3);
+    dy = random(-3, 3);
+  }
+
+  void show() {
+    strokeWeight(1);
+    rectMode(CENTER);
+    noStroke();
+    fill(#C9A27C); 
+    rect(x -18, y, 7, 20); //left arm
+    rect(x +19, y, 7, 20); //right arm
+    stroke(#38D6D2);
+    fill(#21FAF4);  
+    rect( x -15, y -15, 15, 15);  //left shoulder pad
+    rect( x +15, y -15, 15, 15);  //right shoulder pad
+    noStroke();
+    fill(#C9A27C);   
+    rect(x, y -30, 18, 20);  //head
+    stroke(#38D6D2);
+    fill(#21FAF4);
+    rect(x -7, y+28, 13, 30);  //left leg
+    rect(x + 7, y+28, 13, 30);  //right leg
+    rect(x -7.5, y+40, 15, 10);  //left foot
+    rect(x +7.5, y+40, 15, 10);  //right foot  
+    rect(x, y -5, 30, 35);  //chest
+    noStroke();  
+    fill(#FFFFFF);
+    rect(x, y-34, 12, 2);  //eyes
+    fill(#583357);
+    rect(x, y -34, 8, 2);  //eyes
+    stroke(#38D6D2);
+    fill(#21FAF4);
+    beginShape();
+    vertex(x -12, y -27);   //helmet
+    vertex(x -8, y -27);
+    vertex(x -8, y -40);
+    vertex(x -2, y -40);
+    vertex(x -2, y -32);
+    vertex(x + 1, y -32);
+    vertex(x + 2, y -40);
+    vertex(x + 8, y -40);
+    vertex(x + 8, y -27);
+    vertex(x + 12, y -27);
+    vertex(x + 12, y -47);
+    vertex(x - 12, y -47);
+    endShape(CLOSE);
+  }
+
+  void move() { 
+    if (x>width || x < 0) {
+      dx*=-1;
+    }
+    if (y>height || y <horizon) {
+      dy*=-1;
+    }
+    x += dx;
+    y += dy;
+  }
+}
+
+
+
+void ladder() {
+  stroke(0);
+  strokeWeight(1);
+  fill(#906B3A);
+  rectMode(CENTER);
+
+
+  for ( int i = 0; i <= height; i = i + 30) {
+    rect(70, i, 100, 5);
+  }
+  rect(120, 300, 10, height);
+  rect(20, 300, 10, height);
+}
+
+class Ore { 
+  float x = random(50, 750);
+  float y = random(300, 570);
+
+  void reset() {
+    gold.x=  random( 100, width-100 );
+    gold.y=  random( horizon+20, height-20 );
+  }      
+  void show() {
+    stroke(0);
+    fill(#DED300);
+    ellipse( x, y, 30, 15);
+  }
+}
+
+
+class Bird {
+  float x, y, dX;
+  Bird () {
+  }
+  Bird(float tempX, float tempY, float tempdX) {
+    x = tempX;
+    y = tempY;
+    dX= tempdX;  //bird speed
+  }
+
+  void show() {
+    noStroke();
+    fill(#FAFAFA);
+    quad(x, y, x-5, y-5, x + 5, y, x-5, y+5);   //bird
+  }
+
+  void move() {
+    x = x + dX;
+  }
+}
+
+
+
+class Dog {
+  float x = 250;
+  float y = 250;
+  float dx, dy;
+
+  void reset() {
+    x = random(100, 700);
+    y = random( horizon, width-200);
+    dx = random(-1, 1);
+    dy = random(-1, 1);
+  }
+
+  void show() {
+
+    if (dx >= 0) {   //dog turns right
+      strokeWeight(1);
+      rectMode(CENTER);
+      fill(#8A8D80);
+      rect( x, y, 100, 65);  //body
+      rectMode(CENTER);
+      rect( x +35, y + 50, 30, 35);  //right leg
+      rectMode(CENTER);
+      rect( x -35, y + 50, 30, 35);  //left leg
+      rectMode(CENTER);
+      fill(#BA151A);
+      rect( x + 30, y -35, 40, 5);  //leash
+      rectMode(CENTER);
+      fill(#8A8D80);
+      rect( x + 43, y - 60, 65, 45);  //head
+      triangle(x + 10, y - 83, x + 35, y - 118, x + 35, y - 83);  //ear
+      triangle(x - 50, y -5, x - 50, y - 33, x - 80, y - 33); //tail
+      triangle(x - 80, y - 55, x - 50, y - 33, x - 80, y - 33); 
+      ellipseMode(CENTER);
+      fill(#000000);
+      ellipse(x + 30, y -70, 5, 17);  //eyes
+      strokeWeight(4);
+      line(x + 25, y-80, x+35, y-75);  //eyebrows
+    }
+
+
+    if (dx < 0) {  //dog turns left
+      strokeWeight(1);
+      rectMode(CENTER);
+      fill(#8A8D80);
+      rect( x, y, 100, 65);
+      rectMode(CENTER);
+      rect( x +35, y + 50, 30, 35); //right leg
+      rectMode(CENTER);
+      rect( x -35, y + 50, 30, 35);  //left leg
+      rectMode(CENTER);
+      fill(#BA151A);
+      rect( x -30, y -35, 40, 5);  //leash
+      rectMode(CENTER);
+      fill(#8A8D80);
+      rect( x -43, y - 60, 65, 45);  //head
+      triangle(x - 10, y - 83, x - 35, y - 118, x - 35, y - 83);  //ear
+      triangle(x + 50, y -5, x + 50, y - 33, x + 80, y - 33); //tail
+      triangle(x + 80, y - 55, x + 50, y - 33, x + 80, y - 33); 
+      ellipseMode(CENTER);
+      fill(#000000);
+      ellipse(x - 30, y -70, 5, 17);  //eyes
+      strokeWeight(4);
+      line(x -25, y-80, x-35, y-75);  //eyebrows
+    }
+  }
+  void move() { 
+    if (x>width || x < 0) {
+      dx*=-1;
+    }
+    if (y>height || y <horizon) {
+      dy*=-1;
+    }
+    x += dx;
+    y += dy;
+  }
+}
+
+
+class Littledog {
+  float x = 450;
+  float y = 300;
+  float dx, dy;
+
+  void reset() {
+    x = random(100, 700);
+    y = random( horizon, width-200);
+    dx = random(-1, 1);
+    dy = random(-1, 1);
+  }
+
+  void show() {
+    if (dx >= 0) { 
+      strokeWeight(1);
+      rectMode(CENTER);
+      fill(#5D3923);
+      rect( x, y, 50, 32.5);  //body
+      rectMode(CENTER);
+      rect( x +17.5, y + 25, 15, 17.5);  //right leg
+      rectMode(CENTER);
+      rect( x -17.5, y + 25, 15, 17.5);  //left leg
+      rectMode(CENTER);
+      fill(#BA151A);
+      rect( x + 15, y -17.5, 20, 2.5);  //leash
+      rectMode(CENTER);
+      fill(#5D3923);
+      rect( x + 21.5, y - 30, 32.5, 22.5);  //head
+      triangle(x + 5, y - 41.5, x + 17.5, y - 69, x + 17.5, y - 41.5);  //ear
+      triangle(x - 25, y -2.5, x - 25, y - 16.5, x - 40, y - 16.5); //tail
+      triangle(x - 40, y - 27.5, x - 25, y - 16.5, x - 40, y - 16.5); 
+      ellipseMode(CENTER);
+      fill(#000000);
+      ellipse(x + 15, y -35, 2.5, 8.5);  //eyes
+      strokeWeight(4);
+      line(x + 12.5, y-40, x+17.5, y-37.5);  //eyebrows
+    }
+
+    if (dx < 0) { 
+      strokeWeight(1);
+      rectMode(CENTER);
+      fill(#5D3923);
+      rect( x, y, 50, 32.5);  //body
+      rectMode(CENTER);
+      rect( x +17.5, y + 25, 15, 17.5);  //right leg
+      rectMode(CENTER);
+      rect( x -17.5, y + 25, 15, 17.5);  //left leg
+      rectMode(CENTER);
+      fill(#BA151A);
+      rect( x - 15, y -17.5, 20, 2.5);  //leash
+      rectMode(CENTER);
+      fill(#5D3923);
+      rect( x - 21.5, y - 30, 32.5, 22.5);  //head
+      triangle(x - 5, y - 41.5, x - 17.5, y - 69, x - 17.5, y - 41.5);  //ear
+      triangle(x + 25, y -2.5, x + 25, y - 16.5, x + 40, y - 16.5); //tail
+      triangle(x + 40, y - 27.5, x + 25, y - 16.5, x + 40, y - 16.5); 
+      ellipseMode(CENTER);
+      fill(#000000);
+      ellipse(x - 15, y -35, 2.5, 8.5);  //eyes
+      strokeWeight(4);
+      line(x - 12.5, y - 40, x - 17.5, y - 37.5);  //eyebrows
+    }
+  }
+
+  void move() { 
+    if (x>width || x < 0) {
+      dx*=-1;
+    }
+    if (y>height || y <horizon) {
+      dy*=-1;
+    }
+    x += dx;
+    y += dy;
+  }
+}
+
+void buttons() {
+  for (int j=0; j<buttonNames.length; j++) {
+    buttons[j].show();
+  }
+}
+
+
+
+void mousePressed() {
+
+  if ( buttons[0].click(mouseX, mouseY) ) { 
+    jimmy.up(); 
+    return;
+  }
+  if ( buttons[1].click(mouseX, mouseY) ) { 
+    jimmy.down(); 
+    return;
+  }
+  if ( buttons[2].click(mouseX, mouseY) ) { 
+    jimmy.move();  
+    return;
+  }
+  if ( buttons[3].click(mouseX, mouseY) ) { 
+    
+    flock();
+    return;
+  }
+  if ( buttons[4].click(mouseX, mouseY) ) { 
+    reset(); 
+    return;
+  }
+  if ( buttons[5].click(mouseX, mouseY) ) { 
+    exit(); 
+    return;
+  }
+  tom.x= mouseX;
+  tom.y= mouseY;
+}
+
+class Button {
+  float x, y;
+  float w=80, h=30;  //width & height of buttons
+  String name;
+  float r=random(255), g=random(255), b=random(255);  //colors of buttons
+  // CONSTRUCTOR //
+  Button( float x, float y, String s ) {
+    this.x=x;
+    this.y=y;
+    this.name=  s;
+  }
+ 
+  void show() {
+    noStroke();
+    fill(r, g, b);
+    rect( x+40, y+15, w, h );
+    fill(0);
+    text( name, x+5, y+h*2/3 );
+  }
+    boolean click( float mX, float mY ) {
+    if (mX < x)   return false;
+    if (mX > x+w) return false;
+    if (mY < y)   return false;
+    if (mY > y+h) return false;
+    return true;
+  }
+}
+  void makebuttons() {
+    buttons=  new Button[numButtons];
+    float x=200, y=50;
+    for (int j=0; j<numButtons; j++ ) {
+      buttons[j]=  new Button( x, y, buttonNames[j] );
+      y += 50;
+    }
+    
+}
+
+
+class Monkey {
+
+  int mX = 75;  //chest X-axis
+  int mY = 300; //chest Y-axis
+  int lH = 300;   //left hand
+  int rH = 300;   //right hand
+  int lF = 360;   //left foot
+  int rF = 360;   //right foot
+  int cX=1;
+  //chest movement
+  //arms & lefts movement
+
+  void show() { //show monkey
+    noStroke();
+    fill(#766043);
+    ellipse(mX, mY, 60, 120);
+    ellipse(mX, mY-70, 30, 50);
+    stroke(#766043);
+    strokeWeight(5);
+    line(45, lH- 60, mX-26, mY-30); //left arm
+    line(45, lF+ 30, mX-20, mY+45); //left leg
+    line(105, rH-90, mX+26, mY-30);  //right arm
+    line(105, rF, mX+20, mY+45);  //right leg
+    println(lH-60, rH-90, cX);
+  }
+
+  void up() {
+    cX= 1;
+    if (lH-60==0) {
+      cX= 0;
+    }
+    if (lH-60 > rH-90) { 
+      lH = lH - (60*cX);
+      lF = lF - (60*cX);
+      mY = mY - (30*cX);
+    } else { 
+      rH = rH - (60*cX);
+      rF = rF - (60*cX);
+      mY = mY - (30*cX);
+    }
+  }
+
+  void down() {
+    cX = -1;
+    if (rH-90==450) {
+      cX= 0;
+    }
+    if (cX == -1) {
+      if (lH-60 >= rH-90) { 
+        rH = rH - (60*cX);
+        rF = rF - (60*cX);
+        mY = mY - (30*cX);
+      } else { 
+        lH = lH - (60*cX);
+        lF = lF - (60*cX);
+        mY = mY - (30*cX);
+      }
+    }
+  }
+
+  void move() {       //movement of monkey
+    println(lH-60, rH-90, cX, rF);
+    if (lH-60 != 0 && rH-90 != 450) {
+      if (cX == 1) {
+        if (lH-60 > rH-90) { 
+          lH = lH - (60*cX);
+          lF = lF - (60*cX);
+          mY = mY - (30*cX);
+        } else { 
+          rH = rH - (60*cX);
+          rF = rF - (60*cX);
+          mY = mY - (30*cX);
+        }
+      }
+      if (cX == -1) {
+        if (lH-60 >= rH-90) { 
+          rH = rH - (60*cX);
+          rF = rF - (60*cX);
+          mY = mY - (30*cX);
+        } else { 
+          lH = lH - (60*cX);
+          lF = lF - (60*cX);
+          mY = mY - (30*cX);
+        }
+      }
+    } else if (lH-60 == 0 || rH-90 == 450) { 
+      if (lH-60==0) {
+        cX = -1;
+        lH = lH - (60*cX);
+        lF = lF - (60*cX);
+        mY = mY - (30*cX);
+      } else {
+        cX = 1;
+        rH = rH - (60*cX);
+        rF = rF - (60*cX);
+        mY = mY - (30*cX);
+      }
+    }
+  }
+}
+
+void flock() {
+  float birdS = random (1, 6);
+  float bpY = random (2, 15 );
+  birds[0] = new Bird(bP-40, 1*bpY, birdS);
+  birds[1] = new Bird(bP-20, 5*bpY, birdS);
+  birds[2] = new Bird(bP, 9*bpY, birdS);
+  birds[3] = new Bird(bP-20, 14*bpY, birdS);
+  birds[4] = new Bird(bP-40, 19*bpY, birdS);
+}
+
+
+void keyPressed() {
+  if (key == 'r') reset();  //
+  if (key == 's') points = 0;  //reset points to 0
+  if (key == 'q') exit();  //exit
+  if (key == 'u') jimmy.up();    //jimmy moves up only
+  if (key == 'd') jimmy.down();  // jimmy moves down only
+  if (key == 'm') jimmy.move();  //jimmy moves freely
+  if (key == 'k') flock();  //send flock
+}
